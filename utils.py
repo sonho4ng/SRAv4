@@ -30,9 +30,8 @@ def get_span_hidden_states(inputs, hidden_states, attentions, safe_idx, pooler_m
 
             last_token_idxs = seq_lengths - 1
 
-            batch_idxs = torch.arange(summed_attn.size(0), device=summed_attn.device)
-
-            weights = summed_attn[batch_idxs, last_token_idxs].detach()
+            tmp_batch_idxs = torch.arange(summed_attn.size(0), device=summed_attn.device)
+            weights = summed_attn[tmp_batch_idxs, last_token_idxs].detach()
         else:
             weights = (attentions[i-1] * mask_4d).sum(dim=(1, 2)).detach()
 
@@ -74,9 +73,8 @@ def get_span_hidden_states_custom(inputs, hidden_states, attentions, safe_idx, p
 
             last_token_idxs = seq_lengths - 1
 
-            batch_idxs = torch.arange(summed_attn.size(0), device=summed_attn.device)
-
-            weights = summed_attn[batch_idxs, last_token_idxs].detach()
+            tmp_batch_idxs = torch.arange(summed_attn.size(0), device=summed_attn.device)
+            weights = summed_attn[tmp_batch_idxs, last_token_idxs].detach()
         else:
             weights = (attentions[i-1] * mask_4d).sum(dim=(1, 2)).detach()
 
