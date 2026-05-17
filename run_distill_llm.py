@@ -48,7 +48,7 @@ def main():
 
     set_seed(extras.seed)
 
-    login(args.hf_token)
+    # login(args.hf_token)
 
     if extras.teacher_model_type == 'qwen':
         TeacherLLM = TeacherQwen
@@ -65,7 +65,8 @@ def main():
                         'output_hidden_states': args.finetune_hidden_states,
                         'output_attentions': args.output_attentions,
                         'attn_implementation': 'sdpa',
-                        'token' : args.hf_token}
+                        # 'token' : args.hf_token
+                        }
     
     teacher_model = TeacherLLM(model_name = args.teacher_model, 
                                         load_model_kwargs = load_model_kwargs,
@@ -81,8 +82,12 @@ def main():
                                  "torch_dtype": torch.bfloat16,
                                  'attn_implementation': 'eager' if args.output_attentions else 'sdpa'}
 
-    lora_config = {'lora_rank': 256, 'lora_alpha': 8,
-                   'lora_dropout': 0.1, 'lora_target_modules':["q_proj", "v_proj"]}
+    lora_config = {'lora_rank': 32, 'lora_alpha': 64,
+                   'lora_dropout': 0.1, 'lora_target_modules':[
+        "q_proj",
+        "k_proj",
+        "v_proj",
+    ]}
     if extras.student_model_type == 'gpt2':
         lora_config = {'lora_rank': 256, 'lora_alpha': 8,
                    'lora_dropout': 0.1, 'lora_target_modules': ["c_attn", "c_proj"]}
@@ -115,17 +120,18 @@ def main():
         tokenizer_path=args.student_tokenizer,
         model_path=args.student_model,
         sft_lora=None,
-        distilled_lora=args.output_dir,
-        seeds=[10, 20, 30, 40, 50]
+        distilled_lora=args.output_dir + '-epoch5',
+        # seeds=[10, 20, 30, 40, 50]
+        seeds=[50]
     )
 
-    # benchmark_configs = {'dolly': './data/dolly/valid.jsonl',
-    #                     'self_instruct': './data/self-inst/valid.jsonl',
-    #                     'vicuna': './data/vicuna/valid.jsonl',
-    #                     'sni': './data/sinst/11_/valid.jsonl'
-    #                     }
+    # evaluator.model = trainer.student.model.model
 
-    benchmark_configs = {'test': args.test_data}
+    benchmark_configs = {'dolly': './data/llm/dolly/valid.jsonl',
+                        'self_instruct': './data/llm/self-inst/valid.jsonl',
+                        'vicuna': './data/llm/vicuna/valid.jsonl',
+                        'sni': './data/llm/sinst/11_/valid.jsonl'
+                        }
 
     results = evaluator.evaluate_multiple_benchmarks(
         benchmark_configs=benchmark_configs,
@@ -137,14 +143,14 @@ def main():
     with open(args.output_dir + "/eval.json", "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=4)
 
-    # result = evaluator.evaluate_benchmark_dataset(
-    #         dataset_path='./data/dialog/valid.jsonl',
-    #         dataset_name='dialog', batch_size=32,
-    #         max_seq_length=512, max_new_tokens=384)
+    result = evaluator.evaluate_benchmark_dataset(
+            dataset_path='./data/llm/dialog/valid.jsonl',
+            dataset_name='dialog', batch_size=32,
+            max_seq_length=512, max_new_tokens=384)
     
-    # dialog_result = {"rouge_l_f1": result, "status": "success"}
-    # with open(args.output_dir + "/dialog_result_eval.json", "w", encoding="utf-8") as f:
-    #     json.dump(dialog_result, f, ensure_ascii=False, indent=4)
+    dialog_result = {"rouge_l_f1": result, "status": "success"}
+    with open(args.output_dir + "/dialog_result_eval.json", "w", encoding="utf-8") as f:
+        json.dump(dialog_result, f, ensure_ascii=False, indent=4)
     
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ from arguments import Arguments
 from teacher_llm import Teacher, TeacherOutput
 from student import StudentCausalModel, StudentOutput
 from data_utils import LLMDataset, LLMDataCollator
-from loss import cosine_token_weight_loss
+from loss import cosine_token_weight_loss, derivative_loss
 
 from transformers import AutoTokenizer
 from torch import nn
@@ -169,7 +169,15 @@ class Trainer:
                             print('span_loss nan')
                 
 
-                kd_loss += 1 * span_loss
+                if self.args.der_loss:
+                    der_loss = derivative_loss(student_outputs.hidden_states,
+                                            teacher_outputs.hidden_states,
+                                            teacher_outputs.span_weights) / (n_layer - 1)
+
+                    if torch.isnan(der_loss):
+                        print('der_loss nan')
+
+                kd_loss += 2 * (span_loss + der_loss)
 
                 s_hidden = F.normalize(student_outputs.embeddings, dim=-1, eps=1e-5)
                 t_hidden = F.normalize(teacher_outputs.hidden_states[n_layer - 1], dim=-1, eps=1e-5)
