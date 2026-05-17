@@ -27,6 +27,8 @@ OPTS+=" --student_device cuda:6"
 
 # loss
 OPTS+=" --hard_label_loss_weight 0.5"
+OPTS+=" --geom_loss_weight 10"
+OPTS+=" --orthogonal False"
 OPTS+=" --span_loss True"
 OPTS+=" --der_loss True"
 OPTS+=" --span_weight_pooling True"
