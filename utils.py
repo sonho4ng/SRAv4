@@ -23,7 +23,16 @@ def get_span_hidden_states(inputs, hidden_states, attentions, safe_idx, pooler_m
     for i in hidden_layer_fineturn:
         # weights = attentions[i].sum(dim=(1, 2))
         if is_causal:
-            weights = attentions[i-1].sum(dim=1)[:, -1].detach()
+
+            summed_attn = attentions[i-1].sum(dim=1)
+
+            seq_lengths = attention_mask.sum(dim=1).long()
+
+            last_token_idxs = seq_lengths - 1
+
+            batch_idxs = torch.arange(summed_attn.size(0), device=summed_attn.device)
+
+            weights = summed_attn[batch_idxs, last_token_idxs].detach()
         else:
             weights = (attentions[i-1] * mask_4d).sum(dim=(1, 2)).detach()
 
@@ -58,7 +67,16 @@ def get_span_hidden_states_custom(inputs, hidden_states, attentions, safe_idx, p
     for i in hidden_layer_fineturn:
         # weights = attentions[i].sum(dim=(1, 2))
         if is_causal:
-            weights = attentions[i-1].sum(dim=1)[:, -1].detach()
+
+            summed_attn = attentions[i-1].sum(dim=1)
+
+            seq_lengths = attention_mask.sum(dim=1).long()
+
+            last_token_idxs = seq_lengths - 1
+
+            batch_idxs = torch.arange(summed_attn.size(0), device=summed_attn.device)
+
+            weights = summed_attn[batch_idxs, last_token_idxs].detach()
         else:
             weights = (attentions[i-1] * mask_4d).sum(dim=(1, 2)).detach()
 
