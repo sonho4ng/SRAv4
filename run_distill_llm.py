@@ -64,7 +64,7 @@ def main():
                         'trust_remote_code': True,
                         'output_hidden_states': args.finetune_hidden_states,
                         'output_attentions': args.output_attentions,
-                        'attn_implementation': 'sdpa',
+                        'attn_implementation': 'eager',
                         # 'token' : args.hf_token
                         }
     
@@ -80,7 +80,7 @@ def main():
                                  'output_hidden_states': args.finetune_hidden_states,
                                  'output_attentions': args.output_attentions,
                                  "torch_dtype": torch.bfloat16,
-                                 'attn_implementation': 'eager' if args.output_attentions else 'sdpa'}
+                                 'attn_implementation': 'eager'}
 
     lora_config = {'lora_rank': 32, 'lora_alpha': 64,
                    'lora_dropout': 0.1, 'lora_target_modules':[
