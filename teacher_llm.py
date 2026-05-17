@@ -179,11 +179,7 @@ class TeacherQwen(Teacher):
         hidden_states = outputs.hidden_states
         attentions = outputs.attentions
         if attentions is None:
-            attentions = torch.ones((self.model.config.num_hidden_layers,
-                                     inputs['input_ids'].size(0),
-                                     self.model.config.num_attention_heads, 
-                                     inputs['input_ids'].size(1),
-                                     inputs['input_ids'].size(1)), device=inputs['input_ids'].device)
+            raise ValueError("Student: outputs.attentions is None!")
 
         span_weights = None
         if safe_idx is not None and hidden_states is not None:
