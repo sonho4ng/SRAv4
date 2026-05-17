@@ -139,6 +139,7 @@ class Trainer:
         if teacher_outputs is not None:
             if teacher_outputs.hidden_states is not None:
                 span_loss = 0
+                der_loss = 0
                 n_layer = teacher_outputs.hidden_states.size(0)
                 span_weights = teacher_outputs.span_weights.squeeze(-1)
                 _, B, N = span_weights.size()
@@ -169,13 +170,13 @@ class Trainer:
                             print('span_loss nan')
                 
 
-                if self.args.der_loss:
-                    der_loss = derivative_loss(student_outputs.hidden_states,
-                                            teacher_outputs.hidden_states,
-                                            teacher_outputs.span_weights) / (n_layer - 1)
+                # if self.args.der_loss:
+                #     der_loss = derivative_loss(student_outputs.hidden_states,
+                #                             teacher_outputs.hidden_states,
+                #                             teacher_outputs.span_weights) / (n_layer - 1)
 
-                    if torch.isnan(der_loss):
-                        print('der_loss nan')
+                #     if torch.isnan(der_loss):
+                #         print('der_loss nan')
 
                 kd_loss += 2 * (span_loss + der_loss)
 
