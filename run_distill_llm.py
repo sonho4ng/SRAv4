@@ -58,7 +58,7 @@ def main():
         ValueError('teacher model type error')
     
 
-    load_model_kwargs = {'torch_dtype': torch.float16,
+    load_model_kwargs = {'torch_dtype': torch.bfloat16,
                         'quantization_config': None,
                         'device_map': args.teach_device,
                         'trust_remote_code': True,
